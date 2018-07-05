@@ -1,0 +1,318 @@
+/* Veternarian Miniworld
+   COSC344   Assignment 2
+   @Authors
+        Leroy Bird
+        Finn Luxton
+        Celine Ah Kit
+        Ashton Cochrane
+        Rory O'Connor    */
+
+/* Resetting Tables */
+DROP TABLE visit_symptoms;
+DROP TABLE visit_reason;
+DROP TABLE treatment_medicine;
+DROP TABLE manages;
+DROP TABLE staff;
+DROP TABLE procedure;
+DROP TABLE treatment;
+DROP TABLE invoice;
+DROP TABLE visit;
+DROP TABLE pet;
+DROP TABLE customer;
+DROP TABLE breed_species;
+
+/* Creating Database Tables */
+
+CREATE TABLE customer
+       (CustomerID               CHAR(9)       NOT NULL PRIMARY KEY,
+        FName                    CHAR(15)      NOT NULL,
+        LName                    CHAR(15)      NOT NULL,
+        Address                  VARCHAR2(40)  NOT NULL,
+        PNumber                  VARCHAR2(10),
+        DOB                      DATE          NOT NULL,
+        Email                    VARCHAR2(40));
+
+CREATE TABLE breed_species
+       (Breed                    VARCHAR(30)   NOT NULL PRIMARY KEY,
+        Species    	         VARCHAR(30)   NOT NULL);
+
+CREATE TABLE pet
+       (PetID    		 CHAR(9)       NOT NULL PRIMARY KEY,
+        Name     		 VARCHAR2(30)  NOT NULL,
+        Breed    		 VARCHAR(30)   NOT NULL
+           CONSTRAINT p_Breed_cnst REFERENCES breed_species(Breed),
+        Weight   		 INT,
+        DOB      		 DATE,
+        OwnerID  		 CHAR(9)       NOT NULL
+           CONSTRAINT p_OwnerID_cnst REFERENCES customer(CustomerID));
+
+CREATE TABLE visit
+       (VisitID                  CHAR(9)       NOT NULL PRIMARY KEY,
+        VisitDate   	         DATE          NOT NULL,
+        PetID       	         CHAR(9)       NOT NULL
+           CONSTRAINT v_PetID_cnst REFERENCES pet(PetID));
+
+CREATE TABLE invoice
+       (InvoiceID                CHAR(9)       NOT NULL PRIMARY KEY,
+        Amount_Paid       	 NUMERIC(15,2),
+        VisitID    	         CHAR(9)       NOT NULL
+           CONSTRAINT i_VisitID_cnst REFERENCES visit(VisitID),
+        PayeeID    	         CHAR(9)       NOT NULL
+           CONSTRAINT i_PayeeID_cnst REFERENCES customer(CustomerID));
+
+CREATE TABLE treatment
+       (EVisitID 		 CHAR(9)       NOT NULL
+           CONSTRAINT t_EVisitID_cnst REFERENCES visit(VisitID),
+        Name    		 CHAR(30)      NOT NULL,
+        Comments		 VARCHAR(50),
+        Cost		         NUMERIC(15,2) NOT NULL,
+           CONSTRAINT treatmentPK PRIMARY KEY (EVisitID, Name));
+
+CREATE TABLE procedure
+       (EVisitID 		 CHAR(9)       NOT NULL
+           CONSTRAINT p_EVisitID_cnst REFERENCES visit(VisitID),
+        Name    		 CHAR(30)      NOT NULL,
+        Cost		         NUMERIC(15,2),
+        StartTime 	         DATE,
+        EndTime			 DATE,
+           CONSTRAINT procedurePK PRIMARY KEY (EVisitID, Name));
+
+CREATE TABLE staff
+       (IRD 			 CHAR(9)       NOT NULL PRIMARY KEY,
+        FName                    CHAR(15)      NOT NULL,
+        LName                    CHAR(15)      NOT NULL,
+        Occupation               VARCHAR(30)   NOT NULL,
+        DOB 		         DATE,
+        Address                  VARCHAR(60),
+        PNumber  		 VARCHAR(10));
+
+CREATE TABLE manages
+       (EVisitID                 CHAR(9)       NOT NULL
+           CONSTRAINT m_EVisitID_cnst REFERENCES visit(VisitID) ,
+        IRD 			 CHAR(9)       NOT NULL
+           CONSTRAINT m_IRD_cnst REFERENCES staff(IRD) ,
+        CONSTRAINT managesPK PRIMARY KEY (EVisitID, IRD));
+
+CREATE TABLE treatment_medicine
+       (VisitID 	         CHAR(9)       NOT NULL,
+        Name 		         CHAR(30)      NOT NULL,
+        Medicine    	         CHAR(30),
+           CONSTRAINT treatment_medicinePK PRIMARY KEY (VisitID, Name),
+        CONSTRAINT treatment_fk FOREIGN KEY (VisitID, Name) REFERENCES treatment(EVisitID, Name));
+
+CREATE TABLE visit_reason
+       (VisitID                  CHAR(9)       NOT NULL PRIMARY KEY
+           CONSTRAINT v_r_VisitID_cnst REFERENCES visit(VisitID),
+        Reason 			VARCHAR(50));
+
+CREATE TABLE visit_symptoms
+       (VisitID                  CHAR(9)       NOT NULL PRIMARY KEY
+           CONSTRAINT  v_s_VisitID_cnst REFERENCES visit(VisitID),
+        Symptoms  	VARCHAR2(50)           NOT NULL);
+
+/* 
+
+/* Populating tables with data begins */
+
+-- Customer Table Values
+INSERT INTO customer VALUES
+       ('999999999',
+        'John', 'Jimmyboy',
+        '23 Street, Coastal Cove, Beachtown',
+        '022232323',
+        TO_DATE('22-02-1955','DD-MM-YYYY'),
+        '232@gmail.com');
+INSERT INTO customer VALUES 
+       ('111111111', 
+        'Ben', 'Jamin', 
+        '11 Street, Giant Hill, Cityville', 
+        '097826115',
+        TO_DATE('02-11-1993','DD-MM-YYYY'), 
+        'ben_jamin@hotmail.com');
+INSERT INTO customer VALUES
+       ('888888888',
+        'Bob', 'Barker',
+        '46 Crescent, Suburb Slope, Townopolis',
+        '0233262718',
+        TO_DATE('12-12-1923','DD-MM-YYYY'),
+        'BarkBabyBoy@yahoo.co.ru');
+
+-- Breed Species Table Values
+INSERT INTO breed_species VALUES
+       ('Burmese Cat',
+        'Cat');
+
+INSERT INTO breed_species VALUES
+       ('White Rabbit',
+        'Rabbit');
+
+INSERT INTO breed_species VALUES
+       ('German Shephard',
+        'Dog');
+
+-- Pet Table Values
+INSERT INTO pet VALUES
+       ('552233669',
+        'Mr Biggelsworth',
+        'Burmese Cat', 
+        6,
+        TO_DATE('09-01-2002','DD-MM-YYYY'),
+        '999999999');
+INSERT INTO pet VALUES 
+       ('123456712', 
+        'Mr Rabbit', 
+        'White Rabbit', 
+        2, 
+        TO_DATE('12-05-2001','DD-MM-YYYY'), 
+        '111111111');
+INSERT INTO pet VALUES
+       ('101010101',
+        'John no wait Bill',
+        'German Shephard',
+        10,
+        TO_DATE('10-02-1998','DD-MM-YYYY'),
+        '888888888');
+
+-- Visit Table Values
+INSERT INTO visit VALUES
+       ('123456789',
+        TO_DATE('01-01-2010','DD-MM-YYYY'),
+        '552233669');
+INSERT INTO visit VALUES
+       ('189287345',
+        TO_DATE('10-04-2011','DD-MM-YYYY'),
+        '123456712');
+INSERT INTO visit VALUES
+       ('234567890',
+        TO_DATE('11-02-2010','DD-MM-YYYY'),
+        '101010101');
+
+-- Invoice Table Values
+INSERT INTO invoice VALUES
+       ('1',
+        500.20,
+        '123456789',
+        '999999999');
+INSERT INTO invoice VALUES
+       ('2',
+        99.00,
+        '189287345',
+        '111111111');
+INSERT INTO invoice VALUES
+       ('3',
+        100.25,
+        '234567890',
+        '888888888');
+
+-- Treatment Table Values
+INSERT INTO treatment VALUES
+       ('123456789',
+        'Antibiotic',
+        'Fight infection stemming from Paws',
+        300.20);
+INSERT INTO treatment VALUES
+       ('189287345',
+        'Stress Pills',
+        'Bunny needs to eat carrots',
+        90.00);
+INSERT INTO treatment VALUES
+       ('234567890',
+        'Good Boi Pills',
+        'Just sugar pills, all dogs are good boys',
+        50.25);
+
+-- Procedure Table Values
+/* To view starttime values, to_char is required
+   EG SELECT TO_CHAR(starttime, 'DD-MM-YYYY hh24:mi') FROM procedure */
+INSERT INTO procedure VALUES
+       ('123456789',
+        'Antibiotic Procedure',
+        200,
+        TO_DATE('2-3-1923 10:31','DD-MM-YYYY hh24:mi'),
+        TO_DATE('2-3-1923 12:11','DD-MM-YYYY hh24:mi'));
+INSERT INTO procedure VALUES
+       ('189287345',
+        'Breathing excercises',
+        9.00,
+        TO_DATE('15-12-2015 17:41','DD-MM-YYYY hh24:mi'),
+        TO_DATE('15-12-2017 18:20','DD-MM-YYYY hh24:mi'));
+INSERT INTO procedure VALUES
+       ('234567890',
+        'Deep Muscle Massage',
+        50,
+        TO_DATE('20-12-2015 12:30','DD-MM-YYYY hh24:mi'),
+        TO_DATE('21-12-2015 1:30','DD-MM-YYYY hh24:mi'));
+
+-- Staff Table Values
+INSERT INTO staff VALUES
+       ('100000000',
+        'Bob', 'Lawblaw',
+        'Receptionist',
+        TO_DATE('10-05-1985','DD-MM-YYYY'),
+        '50 Long Lane, Grassy Knoll, Cityville',
+        '0227852619');
+INSERT INTO staff VALUES
+       ('200000000',
+        'Charles', 'Von Smoot',
+        'Veterinarian',
+        TO_DATE('01-09-1966','DD-MM-YYYY'),
+        '237 High Road, Cityville Central, Cityville',
+        '0224774712');
+INSERT INTO staff VALUES
+       ('300000000',
+        'Loren','Ipsum',
+        'Nurse',
+        TO_DATE('30-05-1980','DD-MM-YYYY'),
+        '530 Port Drive, Rivet Valley, Hamiltonia',
+        '0237774125');
+
+-- Manages Table Values
+INSERT INTO manages VALUES
+       ('123456789',
+        '200000000');
+INSERT INTO manages VALUES
+       ('189287345',
+        '200000000');
+INSERT INTO manages VALUES
+       ('234567890',
+        '300000000');
+
+-- Treatment Medicine Values
+INSERT INTO treatment_medicine VALUES
+       ('123456789',
+        'Antibiotic',
+        'Sulfamethoxazole');
+INSERT INTO treatment_medicine VALUES
+       ('189287345',
+        'Stress Pills',
+        'Steslamoxlaphylamine');
+INSERT INTO treatment_medicine VALUES
+       ('234567890',
+       'Good Boi Pills',
+       'Dogathyxomlimine');         
+
+-- Visit_Reason Table Values
+INSERT INTO visit_reason VALUES
+       ('123456789',
+        'Cat is very angry');
+INSERT INTO visit_reason VALUES
+       ('189287345',
+        'Rabbit has no hair');
+INSERT INTO visit_reason VALUES
+       ('234567890',
+        'Dog isnt a good boy');  
+
+-- Visit_Symptoms Table Values
+INSERT INTO visit_symptoms VALUES
+       ('123456789',
+        'Damaged Paws');
+INSERT INTO visit_symptoms VALUES
+       ('189287345',
+        'Hairless, mid life crisis');
+INSERT INTO visit_symptoms VALUES
+       ('234567890',
+        'JK all dogs are good boys');
+
+/* Populating tables with data ends */
+
+COMMIT;       

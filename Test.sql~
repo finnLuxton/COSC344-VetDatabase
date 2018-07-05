@@ -1,0 +1,109 @@
+DROP TABLE visit;
+DROP TABLE pet;
+DROP TABLE customer;
+DROP TABLE staff
+DROP TABLE invoice;
+DROP TABLE treatment;
+DROP TABLE procedure;
+
+CREATE TABLE visit
+(VisitID     CHAR(9)       NOT NULL PRIMARY KEY,
+VisitDate   DATE          NOT NULL,
+Reason      VARCHAR2(30),
+Symptoms    VARCHAR2(30),
+PetID       CHAR(9)       NOT NULL
+CONSTRAINT PetID_cnst REFERENCES pet(PetID) DISABLE);
+
+--Fix 3NF
+CREATE TABLE pet
+(PetID    CHAR(9)   NOT NULL PRIMARY KEY,
+Name     VARCHAR2(30) NOT NULL,
+Breed    VARCHAR2(30), --Candidate Key
+Weight   INT,
+DOB      DATE,
+OwnerID  CHAR(9)  NOT NULL);
+
+
+CREATE TABLE customer
+(CustomerID  CHAR(9)   NOT NULL PRIMARY KEY,
+FName       CHAR(15)  NOT NULL,
+LName       CHAR(15)  NOT NULL,
+Address     VARCHAR2(40) NOT NULL,
+PNumber     VARCHAR2(10),
+DOB         DATE NOT NULL,
+Email       VARCHAR2(20));
+​
+
+--Link ForVisit and PayeeID, figure out derived values
+CREATE TABLE invoice
+(InvoiceID  VARCHAR(9) NOT NULL PRIMARY KEY,
+Paid       INT,
+VisitID    VARCHAR(9) NOT NULL,
+PayeeID    VARCHAR(9) NOT NULL);
+
+CREATE TABLE treatment
+(EVisitID /*constraint?*/,
+Name    CHAR(15) NOT NULL,
+Description		,
+Comments
+Cost
+);
+
+
+CREATE TABLE procedure
+(EVisitID 
+Name    CHAR(15) NOT NULL,
+Cost
+StartTime
+EndTime
+);
+
+ALTER TABLE employee ENABLE CONSTRAINT PetID_cnst;
+
+/* POPULATING TABLES WITH DATA BEGINS */
+
+INSERT INTO pet VALUES
+('55223669',
+'Mr Biggelsworth',
+'Fluffy Wuffy Cat',
+12,
+TO_DATE('09-01-2002','DD-MM-YYYY'),
+'999999999');
+
+INSERT INTO visit VALUES
+('123456789',
+TO_DATE('01-01-2010','DD-MM-YYYY'),
+'Cat is very angry',
+'Damaged Paws',
+'552233669');
+
+INSERT INTO customer VALUES
+('999999999',
+'John',
+'Jimmyboy',
+'23 Street',
+'022232323',
+TO_DATE('2-3-1923','DD-MM-YYYY'),
+'232@gmail.com');
+
+INSERT INTO invoice VALUES
+('000000001',
+50,
+'123456789',
+'999999999');
+
+INSERT INTO treatment VALUES
+('000000001',
+50,
+'123456789',
+'999999999');
+
+INSERT INTO procedure VALUES
+('000000001',
+50,
+'123456789',
+'999999999');
+
+/* POPULATING TABLES WITH DATA ENDS */
+
+COMMIT;
